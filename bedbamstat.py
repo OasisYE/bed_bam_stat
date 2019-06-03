@@ -95,8 +95,64 @@ class BedBamStat():
                                                                                                      target_10X,
                                                                                                      capture_rate)
 
+    def onebaitqc(self, samfile, region):
+        '''
+        统计一个bait区间的平均深度，覆盖度，4X覆盖度，10X覆盖度
+        :return:
+        '''
+        contig, starts, ends = str(region[0]), int(region[1]), int(region[2])
+        target_size = np.sum(np.array(ends) - np.array(starts))
+
+        coverage_arr = []
+
+        ACGT = samfile.count_coverage(contig, starts, ends)
+        coverage_arr = sum(np.array(ACGT))
+        target_base = np.sum(list(map(np.sum, coverage_arr)))
+
+        # 平均深度
+        depth_in_target = float(target_base) / target_size
+        # 覆盖度
+        capture_size = sum(map(lambda x: len(x[x > 0]), coverage_arr))
+        target_coverage = float(capture_size) / target_size * 100
+        # 4X覆盖度
+        X4_capture_size = sum(map(lambda x: len(x[x >= 4]), coverage_arr))
+        target_4X = float(X4_capture_size) / target_size * 100
+        # 10X覆盖度
+        X10_capture_size = sum(map(lambda x: len(x[x >= 10]), coverage_arr))
+        target_10X = float(X10_capture_size) / target_size * 100
+
+        return region[4], depth_in_target, target_coverage, target_4X, target_10X
+
     def baitsqcbedbam(self, bam_file:str, bed_file:str, result_file:str):
-        pass
+        '''
+        统计bed文件每个bait区间的平均深度，覆盖度，4X覆盖度，10X覆盖度
+        :param result_file: 文件输出
+        '''
+        assert os.path.exists(bed_file)
+        assert os.path.exists(bam_file)
+
+        bedArray = self.bed2nparray(bed_file)
+        samfile = pysam.AlignmentFile(bam_file)
+
+        starts = list(map(int, bedArray[:, 1]))
+        ends = list(map(int, bedArray[:, 2]))
+        target_size = np.sum(np.array(ends) - np.array(starts))
+        all_alignments = samfile.mapped + samfile.unmapped
+        coverage_arr = []
+        capture_alignments = 0
+
+        out = []
+
+        for one_bait in bedArray:
+            out.append('\t'.join(self.onebaitqc(samfile, one_bait)))
+
+
+        self.write_file(result_file, '\n'.join(out))
+
+
+
+
+
 
 
 
