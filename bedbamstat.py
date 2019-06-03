@@ -102,7 +102,7 @@ class BedBamStat():
         '''
         contig, starts, ends = str(region[0]), int(region[1]), int(region[2])
         target_size = np.sum(np.array(ends) - np.array(starts))
-        baitid = '\-'.join(region[0:2])
+        baitid = '\-'.join(str(region[0:2]))
 
         coverage_arr = []
 
