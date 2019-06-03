@@ -145,7 +145,8 @@ class BedBamStat():
         out = []
 
         for one_bait in bedArray:
-            out.append('\t'.join(self.onebaitqc(samfile, one_bait)))
+            out.append('\t'.join(str(s) for s in self.onebaitqc(samfile, one_bait)))
+ 
 
 
         self.write_file(result_file, '\n'.join(out))
