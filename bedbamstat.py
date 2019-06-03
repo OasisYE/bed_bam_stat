@@ -102,6 +102,7 @@ class BedBamStat():
         '''
         contig, starts, ends = str(region[0]), int(region[1]), int(region[2])
         target_size = np.sum(np.array(ends) - np.array(starts))
+        baitid = '\-'.join(region[0:2])
 
         coverage_arr = []
 
@@ -121,7 +122,7 @@ class BedBamStat():
         X10_capture_size = sum(map(lambda x: len(x[x >= 10]), coverage_arr))
         target_10X = float(X10_capture_size) / target_size * 100
 
-        return region[4], depth_in_target, target_coverage, target_4X, target_10X
+        return baitid, depth_in_target, target_coverage, target_4X, target_10X
 
     def baitsqcbedbam(self, bam_file:str, bed_file:str, result_file:str):
         '''
